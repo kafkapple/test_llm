@@ -27,16 +27,37 @@ class ModelFactory:
         kwargs = {
             "torch_dtype": torch.float16,
             "device_map": "auto",
+            "low_cpu_mem_usage": True,  # 메모리 사용 최적화
+            "trust_remote_code": True,
         }
         
-        if quantization_config is not None:
-            kwargs["quantization_config"] = quantization_config
-        
         try:
-            return AutoModelForCausalLM.from_pretrained(model_path, **kwargs)
+            print("float16으로 모델 로딩 시도...")
+            return AutoModelForCausalLM.from_pretrained(
+                model_path,
+                **kwargs
+            )
         except Exception as e:
-            print(f"모델 로딩 중 오류 발생: {str(e)}")
-            raise
+            print(f"float16 로딩 실패: {str(e)}")
+            try:
+                print("float32로 다시 시도...")
+                kwargs["torch_dtype"] = torch.float32
+                return AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    **kwargs
+                )
+            except Exception as e:
+                print(f"float32로도 실패: {str(e)}")
+                try:
+                    print("CPU로 마지막 시도...")
+                    kwargs["device_map"] = "cpu"
+                    return AutoModelForCausalLM.from_pretrained(
+                        model_path,
+                        **kwargs
+                    )
+                except Exception as e:
+                    print(f"모든 시도 실패: {str(e)}")
+                    raise
 
     @classmethod
     def create_model_and_tokenizer(cls, cfg: DictConfig) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
