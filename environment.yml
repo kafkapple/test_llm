@@ -1,0 +1,34 @@
+name: llm-env
+channels:
+  - pytorch
+  - nvidia
+  - huggingface
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch==2.0.0
+  - torchvision==0.15.0
+  - torchaudio==2.0.0
+  - pytorch-cuda=11.8
+  - cudatoolkit=11.8
+  - pip
+  - pip:
+    - transformers>=4.36.0
+    - accelerate>=0.25.0
+    - bitsandbytes-windows>=0.41.0
+    - scipy
+    - hydra-core>=1.2.0
+    - omegaconf>=2.2.0
+    - pytorch-lightning>=2.0.0
+    - sentencepiece
+    - protobuf
+    - tokenizers>=0.15.0
+    - einops
+    - safetensors
+    - packaging
+    - ninja
+    - datasets
+    - peft
+    - wandb
+    - tqdm 

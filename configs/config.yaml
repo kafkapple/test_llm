@@ -3,6 +3,9 @@ model:
   name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"
   save_path: "../../models"
   force_download: false
+  cache:
+    enabled: true
+    max_memory: "8GiB"  # 최대 메모리 사용량
 
 project:
   timestamp: ${now:%Y%m%d_%H%M%S}
@@ -12,8 +15,10 @@ seed: 42
 max_new_tokens: 2048
 
 # 양자화 설정
-quantization: true
-precision: "int8"
+quantization:
+  enabled: false
+  precision: "int8"
+  compute_dtype: "float16"
 
 # 태스크 설정
 task_type: "summary"  # query, summary, emotion 중 선택
@@ -25,4 +30,21 @@ prompt: "You are a helpful AI assistant. Please answer the user's questions kind
 
 # 템플릿 설정
 summary_template: "다음 텍스트를 논리적 흐름 순으로 정리 요약. 중복은 제거. 형식은 마크다운, 2-3 단계 헤딩 및 2-3 단계 - 들여쓰기:\n{text}"
-emotion_template: "다음 텍스트의 감정을 'happy', 'angry', 'neutral' 중 하나로만 답해주세요:\n{text}"
+emotion_template: "다음 텍스트의 감정을 분석해주세요. JSON 형식으로 다음 필드를 포함하여 답변해주세요: 
+{
+  'emotion': ('happy', 'angry', 'neutral' 중 하나),
+  'confidence': (0-1 사이의 숫자),
+  'reason': (감정 판단 근거),
+  'keywords': (감정과 관련된 주요 단어들의 리스트)
+}\n\n입력 텍스트:\n{text}"
+
+# 생성 설정 추가
+generation:
+  temperature:
+    emotion: 0.1
+    default: 0.3
+  max_tokens:
+    emotion: 10
+    default: 2048
+  top_p: 0.9
+  top_k: 10
