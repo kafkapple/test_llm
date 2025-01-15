@@ -11,7 +11,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import os
 from pathlib import Path
 import torchvision
-torchvision.disable_beta_transforms_warning()
 from model_factory import ModelFactory
 import json
 from typing import Optional, Dict

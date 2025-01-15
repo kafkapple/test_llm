@@ -5,7 +5,7 @@ model:
   force_download: false
   cache:
     enabled: true
-    max_memory: "8GiB"  # 최대 메모리 사용량
+    max_memory: "16GiB"  # 최대 메모리 사용량
 
 project:
   timestamp: ${now:%Y%m%d_%H%M%S}
@@ -16,7 +16,7 @@ max_new_tokens: 2048
 
 # 양자화 설정
 quantization:
-  enabled: false
+  enabled: true
   precision: "int8"
   compute_dtype: "float16"
 
