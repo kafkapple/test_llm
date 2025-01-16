@@ -1,6 +1,6 @@
 # Model settings
 model:
-  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"upstage/SOLAR-10.7B-v1.0" #
+  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"upstage/SOLAR-10.7B-v1.0" # 
   save_path: "../../models"
   force_download: false
   cache:
@@ -12,7 +12,7 @@ task_type: "emotion"  # Options: query, summary, emotion, chat
 
 # Language settings
 language:
-  response: "english"  # Options: korean, english
+  response: "korean"  # Options: korean, english
 
 # Basic settings
 seed: 42
@@ -48,7 +48,7 @@ tasks:
       korean: "당신은 친절한 AI 어시스턴트입니다. 한국어로 간단명료하게 답변해주세요."
       english: "You are a friendly AI assistant. Please provide concise responses in English."
     exit_keywords: 
-      korean: ["종료", "끝", "나가기"]
+      korean: ["quit", "exit", "bye"]
       english: ["quit", "exit", "bye"]
     max_history: 10
     generation:

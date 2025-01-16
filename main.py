@@ -14,11 +14,13 @@ def main(cfg: DictConfig):
     if cfg.task_type == "chat":
         # Chat mode
         print("\n=== Starting chat mode ===")
-        print(f"You can exit using these keywords: {', '.join(cfg.tasks.chat.exit_keywords)}")
+        lang = cfg.language.response
+        exit_keywords = cfg.tasks.chat.exit_keywords[lang]
+        print(f"You can exit using these keywords: {', '.join(exit_keywords)}")
         
         while True:
             user_input = input("\nUser: ").strip()
-            if user_input.lower() in cfg.tasks.chat.exit_keywords:
+            if user_input.lower() in exit_keywords:
                 print("\n=== Ending chat ===")
                 break
             pipeline.process(user_input)
