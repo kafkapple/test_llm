@@ -1,6 +1,6 @@
 # Model settings
 model:
-  name: "upstage/SOLAR-10.7B-v1.0" #"MLP-KTLim/llama-3-Korean-Bllossom-8B" 
+  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"upstage/SOLAR-10.7B-v1.0" #
   save_path: "../../models"
   force_download: false
   cache:
@@ -12,7 +12,7 @@ seed: 42
 max_new_tokens: 2048
 
 # Task settings
-task_type: "chat"  # Options: query, summary, emotion, chat
+task_type: "emotion"  # Options: query, summary, emotion, chat
 
 # Tasks configuration
 tasks:
