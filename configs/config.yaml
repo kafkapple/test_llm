@@ -1,60 +1,15 @@
-# Model settings
-model:
-  name: "upstage/SOLAR-10.7B-v1.0" #"MLP-KTLim/llama-3-Korean-Bllossom-8B" 
-  save_path: "../../models"
-  force_download: false
-  cache:
-    enabled: true
-    max_memory: "16GiB"
+defaults:
+  - model: llama_blossom
+  - task: summary
+  - optimization: default
+  - _self_
 
-# Basic settings
 seed: 42
 max_new_tokens: 2048
+task_type: "summary"
 
-# Task settings
-task_type: "chat"  # Options: query, summary, emotion, chat
-
-# Tasks configuration
-tasks:
-  emotion:
-    prompt: "Please analyze the emotion in the following text:"
-    format_instruction: |
-      Respond in this exact JSON format:
-      {
-        "emotion": "happy/angry/neutral",
-        "confidence": 0.0-1.0,
-        "reason": "your explanation",
-        "keywords": ["word1", "word2"]
-      }
-    template: "{prompt}\n\n{format_instruction}\n\nText: {text}"
-    generation:
-      temperature: 0.1
-      max_tokens: 100
-  
-  summary:
-    template: "Please summarize the following text in logical order. Remove duplicates. Use markdown format with level 2-3 headings and 2-3 level indentation:\n{text}"
-    generation:
-      temperature: 0.3
-      max_tokens: 2048
-  
-  chat:
-    system_prompt: "You are a capable AI assistant. Please help users by engaging in conversation and providing clear, friendly responses."
-    exit_keywords: ["quit", "exit", "bye"]
-    max_history: 10
-    generation:
-      temperature: 0.7
-      max_tokens: 1024
-
-# Common generation settings
 generation:
   top_p: 0.9
   top_k: 10
 
-# Quantization settings
-quantization:
-  enabled: true
-  precision: "int8"
-  compute_dtype: "float16"
-
-# System prompt for all tasks
 prompt: "You are a helpful AI assistant specialized in text analysis and emotional understanding. Please provide detailed and accurate responses."

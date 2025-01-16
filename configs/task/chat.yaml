@@ -1,0 +1,6 @@
+system_prompt: "You are a capable AI assistant. Please help users by engaging in conversation and providing clear, friendly responses."
+exit_keywords: ["quit", "exit", "bye"]
+max_history: 10
+generation:
+  temperature: 0.7
+  max_tokens: 1024 

@@ -1,0 +1,8 @@
+template: "Please summarize the following text in logical order. Remove duplicates. Use markdown format with level 2-3 headings and 2-3 level indentation:\n{text}"
+generation:
+  temperature: 0.3
+  max_tokens: 2048
+  max_new_tokens: 512
+  num_beams: 4
+  length_penalty: 1.2
+  early_stopping: true 

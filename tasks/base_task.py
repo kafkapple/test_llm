@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Dict, Any
 from omegaconf import DictConfig
 
 class BaseTask(ABC):
@@ -16,12 +16,16 @@ class BaseTask(ABC):
         """Process model response"""
         pass
 
-    def get_generation_config(self) -> Dict:
-        """Get generation configuration for the task"""
+    def get_generation_config(self) -> Dict[str, Any]:
+        """Get generation configuration"""
+        task_config = self.config.task
+        
         return {
-            "max_new_tokens": self.config.tasks[self.config.task_type].generation.max_tokens,
-            "temperature": self.config.tasks[self.config.task_type].generation.temperature,
-            "do_sample": True,
+            "temperature": task_config.generation.temperature,
+            "max_new_tokens": task_config.generation.max_tokens,
             "top_p": self.config.generation.top_p,
-            "top_k": self.config.generation.top_k
+            "top_k": self.config.generation.top_k,
+            "do_sample": True,
+            "pad_token_id": 2,  # EOS token as PAD
+            "eos_token_id": 2,
         } 
