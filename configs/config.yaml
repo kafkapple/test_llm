@@ -1,50 +1,60 @@
-# 모델 설정
+# Model settings
 model:
-  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"
+  name: "upstage/SOLAR-10.7B-v1.0" #"MLP-KTLim/llama-3-Korean-Bllossom-8B" 
   save_path: "../../models"
   force_download: false
   cache:
     enabled: true
-    max_memory: "16GiB"  # 최대 메모리 사용량
+    max_memory: "16GiB"
 
-project:
-  timestamp: ${now:%Y%m%d_%H%M%S}
-  hydra_cwd: ${hydra:runtime.cwd}
-# 기본 설정
+# Basic settings
 seed: 42
 max_new_tokens: 2048
 
-# 양자화 설정
+# Task settings
+task_type: "chat"  # Options: query, summary, emotion, chat
+
+# Tasks configuration
+tasks:
+  emotion:
+    prompt: "Please analyze the emotion in the following text:"
+    format_instruction: |
+      Respond in this exact JSON format:
+      {
+        "emotion": "happy/angry/neutral",
+        "confidence": 0.0-1.0,
+        "reason": "your explanation",
+        "keywords": ["word1", "word2"]
+      }
+    template: "{prompt}\n\n{format_instruction}\n\nText: {text}"
+    generation:
+      temperature: 0.1
+      max_tokens: 100
+  
+  summary:
+    template: "Please summarize the following text in logical order. Remove duplicates. Use markdown format with level 2-3 headings and 2-3 level indentation:\n{text}"
+    generation:
+      temperature: 0.3
+      max_tokens: 2048
+  
+  chat:
+    system_prompt: "You are a capable AI assistant. Please help users by engaging in conversation and providing clear, friendly responses."
+    exit_keywords: ["quit", "exit", "bye"]
+    max_history: 10
+    generation:
+      temperature: 0.7
+      max_tokens: 1024
+
+# Common generation settings
+generation:
+  top_p: 0.9
+  top_k: 10
+
+# Quantization settings
 quantization:
   enabled: true
   precision: "int8"
   compute_dtype: "float16"
 
-# 태스크 설정
-task_type: "summary"  # query, summary, emotion 중 선택
-
-# 프롬프트 설정
-prompt_template: "{domain}에서 가장 중요한 것, 그 이유는?"
-domain: "인공지능"
-prompt: "You are a helpful AI assistant. Please answer the user's questions kindly. 당신은 유능한 AI 어시스턴트 입니다. 사용자의 질문에 대해 친절하게 답변해주세요."
-
-# 템플릿 설정
-summary_template: "다음 텍스트를 논리적 흐름 순으로 정리 요약. 중복은 제거. 형식은 마크다운, 2-3 단계 헤딩 및 2-3 단계 - 들여쓰기:\n{text}"
-emotion_template: "다음 텍스트의 감정을 분석해주세요. JSON 형식으로 다음 필드를 포함하여 답변해주세요: 
-{
-  'emotion': ('happy', 'angry', 'neutral' 중 하나),
-  'confidence': (0-1 사이의 숫자),
-  'reason': (감정 판단 근거),
-  'keywords': (감정과 관련된 주요 단어들의 리스트)
-}\n\n입력 텍스트:\n{text}"
-
-# 생성 설정 추가
-generation:
-  temperature:
-    emotion: 0.1
-    default: 0.3
-  max_tokens:
-    emotion: 10
-    default: 2048
-  top_p: 0.9
-  top_k: 10
+# System prompt for all tasks
+prompt: "You are a helpful AI assistant specialized in text analysis and emotional understanding. Please provide detailed and accurate responses."

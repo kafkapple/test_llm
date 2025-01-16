@@ -5,11 +5,11 @@ import torch
 from omegaconf import DictConfig
 
 class ModelFactory:
-    """다양한 LLM 모델을 생성하고 관리하는 팩토리 클래스"""
+    """Factory class for creating and managing various LLM models"""
     
     @staticmethod
     def create_quantization_config(precision: str) -> Optional[BitsAndBytesConfig]:
-        """양자화 설정 생성"""
+        """Create quantization configuration"""
         if precision not in ["int4", "int8"]:
             return None
             
@@ -23,11 +23,11 @@ class ModelFactory:
 
     @staticmethod
     def load_model(model_path: str, quantization_config: Optional[BitsAndBytesConfig] = None):
-        """모델 로딩"""
+        """Load model"""
         kwargs = {
             "torch_dtype": torch.float16,
             "device_map": "auto",
-            "low_cpu_mem_usage": True,  # 메모리 사용 최적화
+            "low_cpu_mem_usage": True,  # Optimize memory usage
             "trust_remote_code": True,
         }
         
@@ -61,7 +61,7 @@ class ModelFactory:
 
     @classmethod
     def create_model_and_tokenizer(cls, cfg: DictConfig) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
-        """모델과 토크나이저 생성 또는 로드"""
+        """Create or load model and tokenizer"""
         model_dir = Path(cfg.model.save_path) / cfg.model.name.split('/')[-1]
         model_dir.mkdir(parents=True, exist_ok=True)
         
