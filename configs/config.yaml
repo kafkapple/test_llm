@@ -12,7 +12,7 @@ seed: 42
 max_new_tokens: 2048
 
 # Task settings
-task_type: "emotion"  # Options: query, summary, emotion, chat
+task_type: "chat"  # Options: query, summary, emotion, chat
 
 # Tasks configuration
 tasks:
