@@ -24,23 +24,39 @@ def main(cfg: DictConfig):
             pipeline.process(user_input)
     else:
         # Single task mode
-        input_text = """moser lab 의 grid cell 관련 연구, x y 축 반복되는 패턴 toroidal 
+        input_text = """topology manifold
+bijection: 1:1 대응
 
-어릴 때 눈 못뜰 때 recording, task 못하니
-grid cell 은 없는데, toroidal manifold 는 존재
+그저 점들의 집합일 뿐, 구분 불가능하나,
+topology 로 구분 가
+연결 구조 neighborhood structure
 
-x y 축 2d space 에서 돌아다니니
-collection
+homeomorphism
+connectedness 등 property
+Manifold
+homology
+구멍 수 셈으로써 분류 가능하다는 이야기
+동일한 종류의 manifold 
+connectedness / 구멍 
 
-task 발생하기 전부터 manifold 발생한다. 
-mean? attractor 도 비슷하다 생각. 
-task dependent 하지 않은 그런 attractor 좀 더 멋지지 않나. 
+국소적 locally manifold = Euclidean (우리가 친숙한)
+마치 지구가 둥글다고 하나, 우리에게는 평평해 보이는 locally 
 
+2차원 위치 좌표 
 
-ersistent activity 를 유지하는 메커니즘으로 최근 Andermann 랩에서 주장하는 cAMP accumulation 이 여기서도 마찬가지로 적용될 수도 있을 것 같다는 생각이드네요. 저번에 지수님 sweet adaptation 도 cAMP accumulation 관련 메커니즘이었지 않았나요.
+집합과 공간을 구분하는 것은?
+나라는 원소 주변은?
 
-camp 같은 2nd messenger 역할 중요할것으로 보임?"""
-        input_text = """근데, 아직 1년도 안됐어. 그리고 난 아직 제대로 뭔가 풀어낸 적도 없다고. 억울하고 화가나는데 젠장."""
+homeomorphism
+일종의 kernel 로 볼수도 있
+
+거리 개념은 날아가고, 굉장히 
+
+구멍 갯수만 보존
+
+A unified theory for the computational and mechanistic origins of grid cells
+저도 이 논문 보면서 topology에 대한 배경지식의 필요성을 느꼈어요"""
+        #input_text = """근데, 아직 1년도 안됐어. 그리고 난 아직 제대로 뭔가 풀어낸 적도 없다고. 억울하고 화가나는데 젠장."""
         pipeline.process(input_text)
 
 if __name__ == "__main__":
