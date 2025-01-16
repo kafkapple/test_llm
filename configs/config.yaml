@@ -7,12 +7,16 @@ model:
     enabled: true
     max_memory: "16GiB"
 
+# Task settings
+task_type: "emotion"  # Options: query, summary, emotion, chat
+
+# Language settings
+language:
+  response: "english"  # Options: korean, english
+
 # Basic settings
 seed: 42
 max_new_tokens: 2048
-
-# Task settings
-task_type: "summary"  # Options: query, summary, emotion, chat
 
 # Tasks configuration
 tasks:
@@ -32,14 +36,20 @@ tasks:
       max_tokens: 100
   
   summary:
-    template: "Please summarize the following text in logical order. Remove duplicates. Use markdown format with level 2-3 headings and 2-3 level indentation:\n{text}"
+    template:
+      korean: "다음 텍스트를 논리적 순서로 요약해주세요. 중복은 제거하고, 마크다운 형식으로 2-3단계 헤딩과 들여쓰기를 사용해주세요:\n{text}"
+      english: "Please summarize the following text in logical order. Remove duplicates. Use markdown format with level 2-3 headings and 2-3 level indentation:\n{text}"
     generation:
       temperature: 0.3
       max_tokens: 2048
   
   chat:
-    system_prompt: "You are a capable AI assistant. Please help users by engaging in conversation and providing clear, friendly responses."
-    exit_keywords: ["quit", "exit", "bye"]
+    system_prompt:
+      korean: "당신은 친절한 AI 어시스턴트입니다. 한국어로 간단명료하게 답변해주세요."
+      english: "You are a friendly AI assistant. Please provide concise responses in English."
+    exit_keywords: 
+      korean: ["종료", "끝", "나가기"]
+      english: ["quit", "exit", "bye"]
     max_history: 10
     generation:
       temperature: 0.7

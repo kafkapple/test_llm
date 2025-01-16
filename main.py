@@ -56,7 +56,7 @@ homeomorphism
 
 A unified theory for the computational and mechanistic origins of grid cells
 저도 이 논문 보면서 topology에 대한 배경지식의 필요성을 느꼈어요"""
-        #input_text = """근데, 아직 1년도 안됐어. 그리고 난 아직 제대로 뭔가 풀어낸 적도 없다고. 억울하고 화가나는데 젠장."""
+        input_text = """반가웠어, 다시 보자!"""
         pipeline.process(input_text)
 
 if __name__ == "__main__":
