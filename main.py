@@ -11,27 +11,16 @@ def main(cfg: DictConfig):
     # Initialize pipeline
     pipeline = LLMPipeline(cfg)
 
-    if cfg.task_type == "chat":
-        # Chat mode
-        print("\n=== Starting chat mode ===")
-        lang = cfg.language.response
-        exit_keywords = cfg.tasks.chat.exit_keywords[lang]
-        print(f"You can exit using these keywords: {', '.join(exit_keywords)}")
-        
-        while True:
-            user_input = input("\nUser: ").strip()
-            if user_input.lower() in exit_keywords:
-                print("\n=== Ending chat ===")
-                break
-            pipeline.process(user_input)
-    else:
+    # Run pipeline with appropriate input
+    if cfg.task_type != "chat":
         # Single task mode
         input_text = """topology manifold
-homeomorphism
 A unified theory for the computational and mechanistic origins of grid cells
-"""
-        input_text = """I can't stand it. How can I get rid of it?"""
-        pipeline.process(input_text)
+저도 이 논문 보면서 topology에 대한 배경지식의 필요성을 느꼈어요"""
+        #input_text = """I can't stand it. How can I get rid of it?"""
+        pipeline.run(input_text)
+    else:
+        pipeline.run()
 
 if __name__ == "__main__":
     main()
