@@ -1,7 +1,7 @@
 
 type: "llama"  # 모델 타입 지정
 name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"upstage/SOLAR-10.7B-v1.0" # beomi/llama-2-ko-7b #meta-llama/Llama-2-7b-hf
-save_path: "../../models"
+save_path: "../models"
 force_download: false
 cache:
   enabled: true
