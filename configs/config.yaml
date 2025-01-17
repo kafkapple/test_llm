@@ -25,7 +25,7 @@ tasks:
     format_instruction: |
       Respond in this exact JSON format:
       {
-        "emotion": "happy/angry/neutral",
+        "emotion": "neutral/happy/sad/angry/fear/surprise/disgust",
         "confidence": 0.0-1.0,
         "reason": "your explanation",
         "keywords": ["word1", "word2"]
