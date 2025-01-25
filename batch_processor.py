@@ -88,109 +88,55 @@ class BatchProcessor:
         source_ids: List[str]
     ) -> List[Dict]:
         """텍스트 배치 처리"""
-        try:
-            print(f"\n배치 처리 중: {source_ids}")
-            
-            # 배치용 프롬프트 생성
-            batch_texts = []
-            for i, text in enumerate(texts, 1):
-                batch_texts.append(f"텍스트 {i}:\n{text}\n")
-            batch_prompt = "\n".join(batch_texts)
-            
-            # 배치 프롬프트로 한 번에 처리
-            response = self.model.generate(batch_prompt)
-            
-            # 응답에서 각 텍스트별 JSON 추출
-            results = []
-            json_matches = re.finditer(r'\{[^{}]*\}', response)
-            
-            for source_id, text, json_str in zip(source_ids, texts, json_matches):
-                try:
-                    parsed = json.loads(json_str.group())
-                    
-                    # 필수 필드 검증
-                    required_fields = [
-                        "emotion", "confidence", "reason", "keywords"
-                    ]
-                    if all(field in parsed for field in required_fields):
-                        result = {
-                            "source_id": source_id,
-                            "input_text": text,
-                            "raw_response": json_str.group(),
-                            "emotion": parsed["emotion"],
-                            "confidence": parsed["confidence"],
-                            "reason": parsed["reason"],
-                            "keywords": parsed["keywords"],
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    else:
-                        result = {
-                            "source_id": source_id,
-                            "input_text": text,
-                            "raw_response": json_str.group(),
-                            "error": "필수 필드 누락",
-                            "timestamp": datetime.now().isoformat()
-                        }
-                except Exception as e:
-                    print(f"JSON 파싱 실패 - {source_id}: {str(e)}")
-                    result = {
-                        "source_id": source_id,
-                        "input_text": text,
-                        "raw_response": response,
-                        "error": str(e),
-                        "timestamp": datetime.now().isoformat()
-                    }
+        results = []
+        for text, source_id in zip(texts, source_ids):
+            try:
+                print(f"\n처리 중: {source_id}")
+                response = self.model.generate(text)
+                
+                # JSON 파싱 시도
+                parsed = None
+                if self.cfg.task_type == "emotion":
+                    try:
+                        json_pattern = r'\{[^{}]*\}'
+                        matches = re.findall(json_pattern, response)
+                        if matches:
+                            json_str = max(matches, key=len)
+                            parsed = json.loads(json_str)
+                            
+                            # 필수 필드 검증
+                            required_fields = [
+                                "emotion", "confidence", "reason", "keywords"
+                            ]
+                            if not all(field in parsed for field in required_fields):
+                                parsed = None
+                    except Exception as e:
+                        print(f"JSON 파싱 실패 - {source_id}: {str(e)}")
+                        parsed = None
+                
+                result = {
+                    "source_id": source_id,
+                    "input_text": text,
+                    "raw_response": response,
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                # 파싱된 결과가 있으면 추가
+                if parsed:
+                    result.update({
+                        "emotion": parsed["emotion"],
+                        "confidence": parsed["confidence"],
+                        "reason": parsed["reason"],
+                        "keywords": parsed["keywords"]
+                    })
+                
                 results.append(result)
                 
-            return results
-            
-        except Exception as e:
-            print(f"배치 처리 실패: {str(e)}")
-            # 개별 처리로 폴백
-            results = []
-            for text, source_id in zip(texts, source_ids):
-                try:
-                    response = self.model.generate(text)
-                    parsed = None
-                    
-                    if self.cfg.task_type == "emotion":
-                        try:
-                            json_pattern = r'\{[^{}]*\}'
-                            matches = re.findall(json_pattern, response)
-                            if matches:
-                                json_str = max(matches, key=len)
-                                parsed = json.loads(json_str)
-                                
-                                required_fields = [
-                                    "emotion", "confidence", "reason", "keywords"
-                                ]
-                                if not all(field in parsed for field in required_fields):
-                                    parsed = None
-                        except Exception as e:
-                            print(f"JSON 파싱 실패 - {source_id}: {str(e)}")
-                    
-                    result = {
-                        "source_id": source_id,
-                        "input_text": text,
-                        "raw_response": response,
-                        "timestamp": datetime.now().isoformat()
-                    }
-                    
-                    if parsed:
-                        result.update({
-                            "emotion": parsed["emotion"],
-                            "confidence": parsed["confidence"],
-                            "reason": parsed["reason"],
-                            "keywords": parsed["keywords"]
-                        })
-                    
-                    results.append(result)
-                    
-                except Exception as e:
-                    print(f"처리 실패 - {source_id}: {str(e)}")
-                    continue
-                
-            return results
+            except Exception as e:
+                print(f"처리 실패 - {source_id}: {str(e)}")
+                continue
+        
+        return results
     
     def _save_results(self, results: List[Dict]) -> None:
         """결과를 JSON 및 CSV 형식으로 저장"""

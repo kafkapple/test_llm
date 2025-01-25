@@ -10,13 +10,27 @@ Format in markdown with 2-3 level headings and 2-3 level indentation:
 }
 
 EMOTION_TEMPLATE = {
-    "korean": """다음 텍스트들의 감정을 분석해주세요. 각 텍스트에 대해 반드시 한국어로 답변하되, 다음 형식의 JSON으로 작성해주세요.
-각 텍스트마다 새로운 JSON 객체를 생성하세요.
+    "korean": """다음 텍스트의 감정을 분석해주세요. 반드시 한국어로 답변하되, 다음 형식의 JSON으로 작성해주세요:
 
+{{
+    "emotion": ["기쁨", "분노", "슬픔", "놀람", "혐오", "두려움", "중립" 중 하나],
+    "confidence": [0-1 사이의 숫자],
+    "reason": [감정 판단 근거],
+    "keywords": [감정과 관련된 주요 단어들의 리스트]
+}}
+
+입력 텍스트:
 {text}""",
-    "english": """Please analyze the emotions in the following texts. For each text, answer in English only using this JSON format.
-Create a new JSON object for each text.
+    "english": """Please analyze the emotion in the following text. Answer in English only, using this JSON format:
 
+{{
+    "emotion": [one of "happy", "angry", "sad", "surprise", "disgust", "fear", "neutral"],
+    "confidence": [number between 0-1],
+    "reason": [reasoning for emotion],
+    "keywords": [list of emotion-related keywords]
+}}
+
+Input text:
 {text}"""
 }
 

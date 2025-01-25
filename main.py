@@ -10,25 +10,44 @@ from omegaconf import DictConfig
 from templates import get_template
 from model_factory import ModelFactory
 from batch_processor import BatchProcessor
+from pathlib import Path
 
 torchvision.disable_beta_transforms_warning()
 
 def parse_emotion_response(response: str) -> Optional[Dict]:
     """감정 분석 응답을 JSON으로 파싱"""
     try:
-        json_pattern = r'\{[^{}]*\}'
-        matches = re.findall(json_pattern, response)
+        # 중첩된 중괄호를 포함한 JSON 블록 찾기
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(json_pattern, response, re.DOTALL)
         
         if not matches:
             print("응답에서 JSON을 찾을 수 없습니다.")
             return None
             
+        # 가장 긴 JSON 문자열 선택
         json_str = max(matches, key=len)
         parsed = json.loads(json_str)
         
+        # 필수 필드 검증
         required_fields = ["emotion", "confidence", "reason", "keywords"]
         if not all(field in parsed for field in required_fields):
             print("필수 필드가 누락되었습니다.")
+            return None
+            
+        # 감정 값 검증
+        valid_emotions_ko = ["기쁨", "분노", "슬픔", "놀람", "혐오", "두려움", "중립"]
+        valid_emotions_en = ["happy", "angry", "sad", "surprise", "disgust", "fear", "neutral"]
+        
+        emotion = parsed["emotion"]
+        if not (emotion in valid_emotions_ko or emotion in valid_emotions_en):
+            print(f"잘못된 감정 값: {emotion}")
+            return None
+            
+        # confidence 값 검증
+        confidence = float(parsed["confidence"])
+        if not (0 <= confidence <= 1):
+            print(f"잘못된 confidence 값: {confidence}")
             return None
             
         return parsed
@@ -152,15 +171,22 @@ def main(cfg: DictConfig) -> None:
     
     processor = BatchProcessor(llama_model, cfg)
     
-    if hasattr(cfg.batch_processing, 'input_dir'):
+    # input_dir이 None이 아니고 실제 존재하는 경우에만 디렉토리 처리
+    if (hasattr(cfg.batch_processing, 'input_dir') and 
+        cfg.batch_processing.input_dir is not None and 
+        Path(cfg.batch_processing.input_dir).exists()):
         processor.process_directory(cfg.batch_processing.input_dir)
-    elif hasattr(cfg.batch_processing, 'csv_file'):
+    
+    # CSV 파일 처리
+    elif (hasattr(cfg.batch_processing, 'csv_file') and 
+          Path(cfg.batch_processing.csv_file).exists()):
         processor.process_csv(
             cfg.batch_processing.csv_file,
             cfg.batch_processing.text_column
         )
+    
     else:
-        print("입력 소스가 지정되지 않았습니다. 기본 예제를 실행합니다.")
+        print("입력 소스가 지정되지 않았거나 파일이 존재하지 않습니다. 기본 예제를 실행합니다.")
         sample_text = (
             "In fact, the bar offered a free glass of beer to the first 100 "
             "fans to walk through the door — if they could quote a line from "

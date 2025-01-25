@@ -20,7 +20,7 @@ max_new_tokens: 2048
 # 양자화 설정
 quantization:
   enabled: true
-  precision: "int8"
+  precision: "int4"
   compute_dtype: "float16"
 
 # 언어 설정
@@ -47,7 +47,7 @@ input_file: "samples/quote.txt"  # 기본 입력 파일 경로
 
 # 배치 처리 설정
 batch_processing:
-  input_dir: "samples/texts"  # txt 파일들이 있는 디렉토리
+  input_dir: null #"samples/texts"  # txt 파일들이 있는 디렉토리
   csv_file: "samples/data.csv"  # CSV 파일 경로
   text_column: "text"  # CSV에서 처리할 텍스트 컬럼명
   batch_size: 4  # 한 번에 처리할 파일/행 수
