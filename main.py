@@ -102,11 +102,11 @@ def generate_prompt(
     attention_mask = torch.ones_like(input_ids)
     
     temp = (cfg.generation.temperature.emotion 
-            if cfg.task_type == "emotion" 
+            if "emotion" in cfg.task_type
             else cfg.generation.temperature.default)
-    
+    print(temp)
     generation_config = {
-        "max_new_tokens": 256 if cfg.task_type == "emotion" else cfg.max_new_tokens,
+        "max_new_tokens": 256 if "emotion" in cfg.task_type else cfg.max_new_tokens,
         "temperature": temp,
         "do_sample": True,
         "eos_token_id": tokenizer.eos_token_id,
@@ -169,30 +169,36 @@ def main(cfg: DictConfig) -> None:
     seed_everything(cfg.seed, workers=True)
     llama_model = LLamaLightningModel(cfg)
     
-    processor = BatchProcessor(llama_model, cfg)
-    
-    # input_dir이 None이 아니고 실제 존재하는 경우에만 디렉토리 처리
-    if (hasattr(cfg.batch_processing, 'input_dir') and 
-        cfg.batch_processing.input_dir is not None and 
-        Path(cfg.batch_processing.input_dir).exists()):
-        processor.process_directory(cfg.batch_processing.input_dir)
-    
-    # CSV 파일 처리
-    elif (hasattr(cfg.batch_processing, 'csv_file') and 
-          Path(cfg.batch_processing.csv_file).exists()):
-        processor.process_csv(
-            cfg.batch_processing.csv_file,
-            cfg.batch_processing.text_column
-        )
-    
-    else:
-        print("입력 소스가 지정되지 않았거나 파일이 존재하지 않습니다. 기본 예제를 실행합니다.")
-        sample_text = (
-            "In fact, the bar offered a free glass of beer to the first 100 "
-            "fans to walk through the door — if they could quote a line from "
-            "the song."
-        )
+    if cfg.debug.enabled:
+        print("===Debug Mode===")
+        print(cfg)
+        sample_text = "Wow! I'm so happy! "
         llama_model.generate(sample_text)
+    else:
+        processor = BatchProcessor(llama_model, cfg)
+
+        # input_dir이 None이 아니고 실제 존재하는 경우에만 디렉토리 처리
+        if (hasattr(cfg.batch_processing, 'input_dir') and 
+            cfg.batch_processing.input_dir is not None and 
+            Path(cfg.batch_processing.input_dir).exists()):
+            processor.process_directory(cfg.batch_processing.input_dir)
+        
+        # CSV 파일 처리
+        elif (hasattr(cfg.batch_processing, 'csv_file') and 
+            Path(cfg.batch_processing.csv_file).exists()):
+            processor.process_csv(
+                cfg.batch_processing.csv_file,
+                cfg.batch_processing.text_column
+            )
+        
+        else:
+            print("Text is not provided.")
+            sample_text = (
+                "In fact, the bar offered a free glass of beer to the first 100 "
+                "fans to walk through the door — if they could quote a line from "
+                "the song."
+            )
+            llama_model.generate(sample_text)
 
 if __name__ == "__main__":
     main()

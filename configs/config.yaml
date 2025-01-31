@@ -1,9 +1,16 @@
 # 태스크 설정
-task_type: "emotion"  # query, summary, emotion 중 선택
+task_type: "emotion_intensity"  # query, summary, emotion 중 선택
+debug:
+  enabled: true
 
 # 모델 설정
 model:
-  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"
+  name: "lzw1008/Emollama-7b" #  "meta-llama/Meta-Llama-3-8B" #"ZebangCheng/Emotion-LLaMA" #"MLP-KTLim/llama-3-Korean-Bllossom-8B" # "sebdg/llama3-8b-emotions" #  ahmedeltabakh/emotions-classification-18-llama-2-7b #
+  # ZebangCheng/Emotion-LLaMA 
+  #sebdg/llama3-8b-emotions
+  #ahmedeltabakh/emotions-classification-18-llama-2-7b
+
+#"mrm8488/t5-base-finetuned-emotion" 
   save_path: "../../models"
   force_download: false
   cache:
@@ -28,8 +35,8 @@ language: "english"  # korean 또는 english
 
 # 프롬프트 설정
 prompt:
-  korean: "당신은 유능한 AI 어시스턴트입니다. 모든 질문에 대해 반드시 한국어로만 답변해주세요."
-  english: "You are a helpful AI assistant. Please answer all questions in English only."
+  korean: "당신은 유능한 AI 감정 분석가입니다. 모든 질문에 대해 반드시 한국어로만 답변해주세요. 응답은 반드시 지정된 JSON 형식을 정확히 따라야 합니다."
+  english: "You are an expert emotion analyzer. Please answer all questions in English only. Your response must strictly follow the specified JSON format. Do not include any text outside the JSON structure."
 
 # 생성 설정 추가
 generation:

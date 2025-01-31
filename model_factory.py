@@ -1,6 +1,9 @@
-from pathlib import Path
 from typing import Tuple, Optional
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig
+)
 import torch
 from omegaconf import DictConfig
 
@@ -8,7 +11,9 @@ class ModelFactory:
     """다양한 LLM 모델을 생성하고 관리하는 팩토리 클래스"""
     
     @staticmethod
-    def create_quantization_config(precision: str) -> Optional[BitsAndBytesConfig]:
+    def create_quantization_config(
+        precision: str
+    ) -> Optional[BitsAndBytesConfig]:
         """양자화 설정 생성"""
         if precision not in ["int4", "int8"]:
             return None
@@ -22,7 +27,10 @@ class ModelFactory:
         )
 
     @staticmethod
-    def load_model(model_path: str, quantization_config: Optional[BitsAndBytesConfig] = None):
+    def load_model(
+        model_path: str,
+        quantization_config: Optional[BitsAndBytesConfig] = None
+    ):
         """모델 로딩"""
         kwargs = {
             "torch_dtype": torch.float16,
@@ -59,26 +67,63 @@ class ModelFactory:
                     print(f"모든 시도 실패: {str(e)}")
                     raise
 
-    @classmethod
-    def create_model_and_tokenizer(cls, cfg: DictConfig) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
-        """모델과 토크나이저 생성 또는 로드"""
-        model_dir = Path(cfg.model.save_path) / cfg.model.name.split('/')[-1]
-        model_dir.mkdir(parents=True, exist_ok=True)
+    @staticmethod
+    def create_model_and_tokenizer(
+        cfg: DictConfig
+    ) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
+        """모델과 토크나이저 생성"""
+        model_name = cfg.model.name
+        cache_dir = cfg.model.save_path if cfg.model.cache.enabled else None
+        
+        # 토크나이저 로드
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_name,
+            cache_dir=cache_dir,
+            trust_remote_code=True
+        )
+        
+        # 기본 chat template 설정
+        if tokenizer.chat_template is None:
+            template = (
+                "{% if not add_generation_prompt is defined %}"
+                "{% set add_generation_prompt = false %}{% endif %}"
+                "{% for message in messages %}"
+                "{{'<|im_start|>' + message['role'] + '\n' + "
+                "message['content'] + '<|im_end|>' + '\n'}}"
+                "{% endfor %}"
+                "{% if add_generation_prompt %}"
+                "{{ '<|im_start|>assistant\n' }}{% endif %}"
+            )
+            tokenizer.chat_template = template
         
         # 양자화 설정
-        bnb_config = cls.create_quantization_config(cfg.quantization.precision) if cfg.quantization.enabled else None
-        
-        if (model_dir / "model").exists() and not cfg.model.force_download:
-            print(f"Loading model from {model_dir}")
-            model = cls.load_model(str(model_dir / "model"), bnb_config)
-            tokenizer = AutoTokenizer.from_pretrained(str(model_dir / "tokenizer"))
+        if cfg.quantization.enabled:
+            if cfg.quantization.precision == "int8":
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    load_in_8bit=True,
+                    trust_remote_code=True,
+                    device_map="auto"
+                )
+            elif cfg.quantization.precision == "int4":
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    cache_dir=cache_dir,
+                    load_in_4bit=True,
+                    trust_remote_code=True,
+                    device_map="auto"
+                )
+            else:
+                raise ValueError(
+                    f"지원하지 않는 양자화 정밀도: {cfg.quantization.precision}"
+                )
         else:
-            print(f"Downloading model {cfg.model.name}...")
-            model = cls.load_model(cfg.model.name, bnb_config)
-            tokenizer = AutoTokenizer.from_pretrained(cfg.model.name)
-            
-            # 모델과 토크나이저 저장
-            model.save_pretrained(str(model_dir / "model"))
-            tokenizer.save_pretrained(str(model_dir / "tokenizer"))
-            
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name,
+                cache_dir=cache_dir,
+                trust_remote_code=True,
+                device_map="auto"
+            )
+        
         return model, tokenizer 
