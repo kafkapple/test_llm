@@ -1,0 +1,71 @@
+text,categorical_emotion,arousal,valence
+I feel okay today.,neutral,0.37,0.59
+Nothing special is happening.,neutral,0.45,0.52
+Just another ordinary day.,neutral,0.33,0.43
+I am neither happy nor sad.,neutral,0.31,0.57
+"Everything is fine, I guess.",neutral,0.42,0.54
+I don’t feel much emotion right now.,neutral,0.3,0.59
+Nothing is particularly exciting or upsetting.,neutral,0.47,0.44
+I am just going through my routine.,neutral,0.34,0.44
+"A regular, uneventful day.",neutral,0.36,0.5
+Everything is as expected.,neutral,0.39,0.46
+I am feeling absolutely fantastic!,happy,0.78,0.73
+Today is such a beautiful day.,happy,0.69,0.77
+"I can't stop smiling, everything is perfect.",happy,0.74,0.86
+This is the happiest moment of my life!,happy,0.66,0.8
+I feel so grateful and excited.,happy,0.78,0.71
+Happiness is all around me today.,happy,0.78,0.73
+I am full of positive energy!,happy,0.62,0.89
+This news just made my day.,happy,0.89,0.86
+Every moment is filled with joy!,happy,0.69,0.72
+Nothing can bring me down today.,happy,0.81,0.79
+I feel so alone and lost.,sad,0.14,0.25
+This is one of the worst days ever.,sad,0.11,0.37
+I can't seem to find happiness anymore.,sad,0.18,0.3
+Everything feels so empty right now.,sad,0.19,0.26
+My heart is heavy with sorrow.,sad,0.26,0.16
+I just want to be left alone.,sad,0.39,0.33
+Tears won't stop falling from my eyes.,sad,0.38,0.37
+I feel like nothing matters anymore.,sad,0.28,0.38
+Sadness is overwhelming me.,sad,0.13,0.16
+I don't know how to move forward.,sad,0.11,0.2
+I am absolutely furious right now!,angry,0.78,0.15
+"This is so frustrating, I can't believe it!",angry,0.87,0.17
+How could they do this to me?,angry,0.76,0.21
+I can't stand this situation anymore.,angry,0.73,0.26
+Everything is making me so angry!,angry,0.71,0.3
+I feel like yelling at someone.,angry,0.85,0.14
+This is totally unacceptable!,angry,0.7,0.26
+I'm losing my patience completely.,angry,0.84,0.25
+This is driving me insane!,angry,0.85,0.11
+I need to cool down before I explode.,angry,0.77,0.12
+That was the scariest moment of my life!,fear,0.87,0.29
+I am trembling with fear.,fear,0.77,0.12
+I feel so anxious and uneasy.,fear,0.76,0.2
+My heart is pounding so fast.,fear,0.85,0.29
+I can't stop thinking about what might happen.,fear,0.88,0.24
+This situation makes me feel so helpless.,fear,0.72,0.31
+I just want to run away from this.,fear,0.85,0.27
+I don't feel safe at all.,fear,0.85,0.25
+Something feels terribly wrong.,fear,0.8,0.23
+I am completely terrified right now.,fear,0.71,0.13
+I can't believe what just happened!,surprise,0.61,0.69
+This is the most unexpected thing ever!,surprise,0.69,0.65
+Wow! I was not prepared for this at all.,surprise,0.87,0.57
+I am absolutely shocked!,surprise,0.72,0.73
+This was a complete surprise!,surprise,0.67,0.52
+I never saw this coming!,surprise,0.69,0.55
+My mind is blown right now!,surprise,0.88,0.74
+This is way beyond my expectations!,surprise,0.79,0.76
+I am in total disbelief!,surprise,0.84,0.56
+This caught me completely off guard!,surprise,0.87,0.66
+That was absolutely disgusting!,disgust,0.62,0.28
+I feel so grossed out right now.,disgust,0.43,0.12
+I can't stand the sight of this.,disgust,0.39,0.19
+This makes me feel so sick.,disgust,0.63,0.27
+I feel completely repulsed.,disgust,0.3,0.2
+This is beyond nasty!,disgust,0.47,0.14
+I have never felt this disgusted before.,disgust,0.35,0.17
+This is so unbearable to watch.,disgust,0.68,0.16
+I can't handle this awful smell!,disgust,0.51,0.24
+Everything about this is just revolting.,disgust,0.45,0.29
