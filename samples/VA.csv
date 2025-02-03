@@ -1,4 +1,4 @@
-text,categorical_emotion,arousal,valence
+text,class,arousal,valence
 I feel okay today.,neutral,0.37,0.59
 Nothing special is happening.,neutral,0.45,0.52
 Just another ordinary day.,neutral,0.33,0.43
