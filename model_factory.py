@@ -9,13 +9,13 @@ from omegaconf import DictConfig
 from pathlib import Path
 
 class ModelFactory:
-    """다양한 LLM 모델을 생성하고 관리하는 팩토리 클래스"""
+    """Factory class for managing various LLM models"""
     
     @staticmethod
     def create_quantization_config(
         precision: str
     ) -> Optional[BitsAndBytesConfig]:
-        """양자화 설정 생성"""
+        """Create quantization configuration"""
         if precision not in ["int4", "int8"]:
             return None
             
@@ -32,62 +32,62 @@ class ModelFactory:
         model_path: str,
         quantization_config: Optional[BitsAndBytesConfig] = None
     ):
-        """모델 로딩"""
+        """Load model"""
         kwargs = {
             "torch_dtype": torch.float16,
             "device_map": "auto",
-            "low_cpu_mem_usage": True,  # 메모리 사용 최적화
+            "low_cpu_mem_usage": True,  # Optimize memory usage
             "trust_remote_code": True,
         }
         
         try:
-            print("float16으로 모델 로딩 시도...")
+            print("Attempting to load model in float16...")
             return AutoModelForCausalLM.from_pretrained(
                 model_path,
                 **kwargs
             )
         except Exception as e:
-            print(f"float16 로딩 실패: {str(e)}")
+            print(f"Failed to load in float16: {str(e)}")
             try:
-                print("float32로 다시 시도...")
+                print("Retrying with float32...")
                 kwargs["torch_dtype"] = torch.float32
                 return AutoModelForCausalLM.from_pretrained(
                     model_path,
                     **kwargs
                 )
             except Exception as e:
-                print(f"float32로도 실패: {str(e)}")
+                print(f"Failed with float32: {str(e)}")
                 try:
-                    print("CPU로 마지막 시도...")
+                    print("Final attempt using CPU...")
                     kwargs["device_map"] = "cpu"
                     return AutoModelForCausalLM.from_pretrained(
                         model_path,
                         **kwargs
                     )
                 except Exception as e:
-                    print(f"모든 시도 실패: {str(e)}")
+                    print(f"All attempts failed: {str(e)}")
                     raise
 
     @staticmethod
     def create_model_and_tokenizer(
         cfg: DictConfig
     ) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
-        """모델과 토크나이저 생성"""
+        """Create model and tokenizer"""
         model_name = cfg.model.name
         
-        # 모델 저장 경로 설정
+        # Set model save path
         save_path = Path(cfg.model.save_path) / model_name.split('/')[-1]
         save_path.mkdir(parents=True, exist_ok=True)
         
-        # 캐시 설정
+        # Cache configuration
         if cfg.model.cache.enabled:
             cache_dir = save_path
         else:
             cache_dir = None
         
-        print(f"모델 저장 경로: {save_path}")
+        print(f"Model save path: {save_path}")
         
-        # 토크나이저 로드
+        # Load tokenizer
         try:
             tokenizer = AutoTokenizer.from_pretrained(
                 model_name,
@@ -96,10 +96,10 @@ class ModelFactory:
                 force_download=cfg.model.force_download
             )
         except Exception as e:
-            print(f"토크나이저 로딩 실패: {str(e)}")
-            # 로컬 경로에서 재시도
+            print(f"Failed to load tokenizer: {str(e)}")
+            # Retry from local path
             if save_path.exists():
-                print(f"로컬 경로에서 토크나이저 로드 시도: {save_path}")
+                print(f"Attempting to load tokenizer from local path: {save_path}")
                 tokenizer = AutoTokenizer.from_pretrained(
                     str(save_path),
                     trust_remote_code=True
@@ -107,7 +107,7 @@ class ModelFactory:
             else:
                 raise
         
-        # 기본 chat template 설정
+        # Set default chat template
         if tokenizer.chat_template is None:
             template = (
                 "{% if not add_generation_prompt is defined %}"
@@ -121,7 +121,7 @@ class ModelFactory:
             )
             tokenizer.chat_template = template
         
-        # 모델 로드
+        # Load model
         try:
             if cfg.quantization.enabled:
                 if cfg.quantization.precision == "int8":
@@ -144,7 +144,7 @@ class ModelFactory:
                     )
                 else:
                     raise ValueError(
-                        f"지원하지 않는 양자화 정밀도: {cfg.quantization.precision}"
+                        f"Unsupported quantization precision: {cfg.quantization.precision}"
                     )
             else:
                 model = AutoModelForCausalLM.from_pretrained(
@@ -155,10 +155,10 @@ class ModelFactory:
                     force_download=cfg.model.force_download
                 )
         except Exception as e:
-            print(f"모델 로딩 실패: {str(e)}")
-            # 로컬 경로에서 재시도
+            print(f"Failed to load model: {str(e)}")
+            # Retry from local path
             if save_path.exists():
-                print(f"로컬 경로에서 모델 로드 시도: {save_path}")
+                print(f"Attempting to load model from local path: {save_path}")
                 model = AutoModelForCausalLM.from_pretrained(
                     str(save_path),
                     trust_remote_code=True,

@@ -15,55 +15,57 @@ from pathlib import Path
 torchvision.disable_beta_transforms_warning()
 
 def parse_emotion_response(response: str) -> Optional[Dict]:
-    """감정 분석 응답을 JSON으로 파싱"""
+    """Parse emotion analysis response into JSON"""
     try:
-        # 중첩된 중괄호를 포함한 JSON 블록 찾기
+        print(f"===Response: {response}")
+        # Find JSON block including nested braces
         json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
         matches = re.findall(json_pattern, response, re.DOTALL)
         
         if not matches:
-            print("응답에서 JSON을 찾을 수 없습니다.")
+            print("No JSON found in response.")
             return None
             
-        # 가장 긴 JSON 문자열 선택
+        # Select longest JSON string
         json_str = max(matches, key=len)
         parsed = json.loads(json_str)
         
-        # 필수 필드 검증
-        required_fields = ["emotion", "confidence", "reason", "keywords"]
+        # Validate required fields
+        required_fields = ["emotion", "confidence", "reason", "keywords", "arousal", "valence"]
         if not all(field in parsed for field in required_fields):
-            print("필수 필드가 누락되었습니다.")
+            print("Missing required fields.")
             return None
             
-        # 감정 값 검증
+        # Validate emotion value
         valid_emotions_ko = ["기쁨", "분노", "슬픔", "놀람", "혐오", "두려움", "중립"]
         valid_emotions_en = ["happy", "angry", "sad", "surprise", "disgust", "fear", "neutral"]
         
         emotion = parsed["emotion"]
         if not (emotion in valid_emotions_ko or emotion in valid_emotions_en):
-            print(f"잘못된 감정 값: {emotion}")
+            print(f"Invalid emotion value: {emotion}")
             return None
             
-        # confidence 값 검증
+        # Validate confidence value
         confidence = float(parsed["confidence"])
         if not (0 <= confidence <= 1):
-            print(f"잘못된 confidence 값: {confidence}")
+            print(f"Invalid confidence value: {confidence}")
             return None
-            
+        # parsed["arousal"]
+        # parsed["valence"]
         return parsed
         
     except json.JSONDecodeError as e:
-        print(f"JSON 디코딩 오류: {str(e)}")
+        print(f"JSON decoding error: {str(e)}")
         return None
     except Exception as e:
-        print(f"예상치 못한 오류: {str(e)}")
+        print(f"Unexpected error: {str(e)}")
         return None
 
 def get_instruction(cfg: DictConfig, input_text: str) -> str:
-    """템플릿에 따른 지시문 생성"""
+    """Generate instruction based on template"""
     template = get_template(cfg.task_type, cfg.language)
     if template is None:
-        raise ValueError(f"지원하지 않는 태스크 타입입니다: {cfg.task_type}")
+        raise ValueError(f"Unsupported task type: {cfg.task_type}")
     
     if cfg.task_type == "query":
         return template.format(domain=cfg.domain)
@@ -75,12 +77,12 @@ def generate_prompt(
     model,
     input_text: str
 ) -> str:
-    """프롬프트 생성 및 모델 응답 생성"""
+    """Generate prompt and model response"""
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
     
-    # 언어에 따른 프롬프트 선택
+    # Select prompt based on language
     prompt = cfg.prompt.get(cfg.language, cfg.prompt.korean)
     instruction = get_instruction(cfg, input_text)
     
@@ -130,13 +132,15 @@ def generate_prompt(
         parsed_response = parse_emotion_response(response)
         if parsed_response:
             print(f"===Input: {instruction}")
-            print("===분석 결과:")
-            print(f"감정: {parsed_response.get('emotion')}")
-            print(f"확신도: {parsed_response.get('confidence')}")
-            print(f"근거: {parsed_response.get('reason')}")
-            print(f"주요 단어: {', '.join(parsed_response.get('keywords', []))}")
+            print("===Analysis Result:")
+            print(f"Emotion: {parsed_response.get('emotion')}")
+            print(f"Arousal: {parsed_response.get('arousal')}")
+            print(f"Valence: {parsed_response.get('valence')}")
+            print(f"Confidence: {parsed_response.get('confidence')}")
+            print(f"Reason: {parsed_response.get('reason')}")
+            print(f"Keywords: {', '.join(parsed_response.get('keywords', []))}")
         else:
-            print("JSON 파싱 실패. 원본 응답:")
+            print("JSON parsing failed. Original response:")
             print(response)
     else:
         print(f"===Input: {instruction}\n===Generated Response:\n{response}")
@@ -144,7 +148,7 @@ def generate_prompt(
     return response
 
 class LLamaLightningModel(LightningModule):
-    """LLaMA 모델을 위한 Lightning 모듈"""
+    """Lightning module for LLaMA model"""
     
     def __init__(self, cfg: DictConfig):
         super().__init__()
@@ -160,15 +164,16 @@ class LLamaLightningModel(LightningModule):
         )
 
     def generate(self, input_text: str) -> str:
-        """주어진 입력 텍스트에 대한 응답 생성"""
+        """Generate response for given input text"""
         return generate_prompt(self.cfg, self.tokenizer, self.model, input_text)
-
+from time import time
 @hydra.main(version_base="1.2", config_path="./configs", config_name="config")
 def main(cfg: DictConfig) -> None:
-    """메인 실행 함수"""
+    """Main execution function"""
     seed_everything(cfg.seed, workers=True)
     llama_model = LLamaLightningModel(cfg)
     
+    time_start = time.time()
     if cfg.debug.enabled:
         print("===Debug Mode===")
         print(cfg)
@@ -177,13 +182,13 @@ def main(cfg: DictConfig) -> None:
     else:
         processor = BatchProcessor(llama_model, cfg)
 
-        # input_dir이 None이 아니고 실제 존재하는 경우에만 디렉토리 처리
+        # Process directory only if input_dir exists
         if (hasattr(cfg.batch_processing, 'input_dir') and 
             cfg.batch_processing.input_dir is not None and 
             Path(cfg.batch_processing.input_dir).exists()):
             processor.process_directory(cfg.batch_processing.input_dir)
         
-        # CSV 파일 처리
+        # Process CSV file
         elif (hasattr(cfg.batch_processing, 'csv_file') and 
             Path(cfg.batch_processing.csv_file).exists()):
             processor.process_csv(
@@ -199,6 +204,9 @@ def main(cfg: DictConfig) -> None:
                 "the song."
             )
             llama_model.generate(sample_text)
+    time_end = time.time()
+    print(f"===Time: {time_end - time_start}")
 
 if __name__ == "__main__":
     main()
+

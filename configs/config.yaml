@@ -1,43 +1,41 @@
-# 태스크 설정
-task_type: "emotion"  # query, summary, emotion 중 선택
+# Task settings
+task_type: "emotion"  # Choose from: query, summary, emotion
 debug:
   enabled: false
 
-# 모델 설정
+# Model settings
 model:
-  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"  "meta-llama/Meta-Llama-3-8B" # lzw1008/Emollama-7b" #  " #"ZebangCheng/Emotion-LLaMA" ## "sebdg/llama3-8b-emotions" #  ahmedeltabakh/emotions-classification-18-llama-2-7b #
-  # ZebangCheng/Emotion-LLaMA 
-  #name: "meta-llama/Llama-2-7b-chat-hf"  # 모델 이름 수정
-  save_path: "../../models"  # 모델 저장 경로
-  force_download: false  # 기존 캐시 무시하고 강제 다운로드 여부
+  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"
+  save_path: "../../models"  # Model save path
+  force_download: false  # Force download ignoring cache
   cache:
-    enabled: true  # 캐시 사용 여부
-    max_memory: "8GiB"  # 최대 메모리 사용량
+    enabled: true  # Use cache
+    max_memory: "8GiB"  # Maximum memory usage
 
-#"mrm8488/t5-base-finetuned-emotion" 
-
+# Project settings
 project:
   timestamp: ${now:%Y%m%d_%H%M%S}
   hydra_cwd: ${hydra:runtime.cwd}
-# 기본 설정
+
+# Basic settings
 seed: 42
 max_new_tokens: 2048
  
-# 양자화 설정
+# Quantization settings
 quantization:
   enabled: true
   precision: "int4"
   compute_dtype: "float16"
 
-# 언어 설정
-language: "english"  # korean 또는 english
+# Language settings
+language: "english"  # korean or english
 
-# 프롬프트 설정
+# Prompt settings
 prompt:
-  korean: "당신은 유능한 AI 감정 분석가입니다. 모든 질문에 대해 반드시 한국어로만 답변해주세요. 응답은 반드시 지정된 JSON 형식을 정확히 따라야 합니다."
+  korean: "You are a skilled AI emotion analyzer. Please respond in Korean only. Your response must strictly follow the specified JSON format."
   english: "You are an expert emotion analyzer. Please answer all questions in English only. Your response must strictly follow the specified JSON format. Do not include any text outside the JSON structure."
 
-# 생성 설정 추가
+# Generation settings
 generation:
   temperature:
     emotion: 0.1
@@ -48,12 +46,13 @@ generation:
   top_p: 0.9
   top_k: 10
 
-# 입력 설정
-input_file: "samples/quote.txt"  # 기본 입력 파일 경로
+# Input settings
+input_file: "samples/quote.txt"  # Default input file path
 
-# 배치 처리 설정
+# Batch processing settings
 batch_processing:
-  input_dir: null #"samples/texts"  # txt 파일들이 있는 디렉토리
-  csv_file: "samples/data.csv"  # CSV 파일 경로
-  text_column: "text"  # CSV에서 처리할 텍스트 컬럼명
-  batch_size: 4  # 한 번에 처리할 파일/행 수
+  input_dir: null  # Directory containing txt files
+  csv_file: "samples/VA.csv"  # CSV file path
+
+  text_column: "text"  # Text column name in CSV
+  batch_size: 4  # Number of files/rows to process at once
