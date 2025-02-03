@@ -1,21 +1,20 @@
 # 태스크 설정
-task_type: "emotion_intensity"  # query, summary, emotion 중 선택
+task_type: "emotion"  # query, summary, emotion 중 선택
 debug:
-  enabled: true
+  enabled: false
 
 # 모델 설정
 model:
-  name: "lzw1008/Emollama-7b" #  "meta-llama/Meta-Llama-3-8B" #"ZebangCheng/Emotion-LLaMA" #"MLP-KTLim/llama-3-Korean-Bllossom-8B" # "sebdg/llama3-8b-emotions" #  ahmedeltabakh/emotions-classification-18-llama-2-7b #
+  name: "MLP-KTLim/llama-3-Korean-Bllossom-8B"  #"  "meta-llama/Meta-Llama-3-8B" # lzw1008/Emollama-7b" #  " #"ZebangCheng/Emotion-LLaMA" ## "sebdg/llama3-8b-emotions" #  ahmedeltabakh/emotions-classification-18-llama-2-7b #
   # ZebangCheng/Emotion-LLaMA 
-  #sebdg/llama3-8b-emotions
-  #ahmedeltabakh/emotions-classification-18-llama-2-7b
+  #name: "meta-llama/Llama-2-7b-chat-hf"  # 모델 이름 수정
+  save_path: "../../models"  # 모델 저장 경로
+  force_download: false  # 기존 캐시 무시하고 강제 다운로드 여부
+  cache:
+    enabled: true  # 캐시 사용 여부
+    max_memory: "8GiB"  # 최대 메모리 사용량
 
 #"mrm8488/t5-base-finetuned-emotion" 
-  save_path: "../../models"
-  force_download: false
-  cache:
-    enabled: true
-    max_memory: "8GiB"  # 최대 메모리 사용량
 
 project:
   timestamp: ${now:%Y%m%d_%H%M%S}
