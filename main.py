@@ -11,6 +11,7 @@ from templates import get_template
 from model_factory import ModelFactory
 from batch_processor import BatchProcessor
 from pathlib import Path
+import time
 
 torchvision.disable_beta_transforms_warning()
 
@@ -28,7 +29,7 @@ def parse_emotion_response(response: str) -> Optional[Dict]:
             
         # Select longest JSON string
         json_str = max(matches, key=len)
-        parsed = json.loads(json_str)
+        parsed = json.loads(json_str.strip())
         
         # Validate required fields
         required_fields = ["emotion", "confidence", "reason", "keywords", "arousal", "valence"]
@@ -40,18 +41,23 @@ def parse_emotion_response(response: str) -> Optional[Dict]:
         valid_emotions_ko = ["기쁨", "분노", "슬픔", "놀람", "혐오", "두려움", "중립"]
         valid_emotions_en = ["happy", "angry", "sad", "surprise", "disgust", "fear", "neutral"]
         
-        emotion = parsed["emotion"]
-        if not (emotion in valid_emotions_ko or emotion in valid_emotions_en):
+        emotion = parsed["emotion"].lower()
+        if not (emotion in [e.lower() for e in valid_emotions_ko] or 
+                emotion in [e.lower() for e in valid_emotions_en]):
             print(f"Invalid emotion value: {emotion}")
             return None
             
-        # Validate confidence value
-        confidence = float(parsed["confidence"])
-        if not (0 <= confidence <= 1):
-            print(f"Invalid confidence value: {confidence}")
-            return None
-        # parsed["arousal"]
-        # parsed["valence"]
+        # Validate numeric fields
+        for field in ["confidence", "arousal", "valence"]:
+            try:
+                value = float(parsed[field])
+                if not (0 <= value <= 1):
+                    print(f"Invalid {field} value: {value}")
+                    return None
+            except (ValueError, TypeError):
+                print(f"Invalid {field} format: {parsed[field]}")
+                return None
+        
         return parsed
         
     except json.JSONDecodeError as e:
@@ -166,14 +172,14 @@ class LLamaLightningModel(LightningModule):
     def generate(self, input_text: str) -> str:
         """Generate response for given input text"""
         return generate_prompt(self.cfg, self.tokenizer, self.model, input_text)
-from time import time
+
 @hydra.main(version_base="1.2", config_path="./configs", config_name="config")
 def main(cfg: DictConfig) -> None:
     """Main execution function"""
     seed_everything(cfg.seed, workers=True)
     llama_model = LLamaLightningModel(cfg)
     
-    time_start = time.time()
+    start_time = time.time()
     if cfg.debug.enabled:
         print("===Debug Mode===")
         print(cfg)
@@ -204,8 +210,8 @@ def main(cfg: DictConfig) -> None:
                 "the song."
             )
             llama_model.generate(sample_text)
-    time_end = time.time()
-    print(f"===Time: {time_end - time_start}")
+    end_time = time.time()
+    print(f"===Time: {end_time - start_time}")
 
 if __name__ == "__main__":
     main()
